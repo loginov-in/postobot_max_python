@@ -109,6 +109,11 @@ async def on_command_start(event: MessageCreated, context: MemoryContext):
     await event.message.answer(TEXT_MENU, attachments=[menu_markup(event.bot)])
 
 
+@dp.message_created(Command("id"))
+async def on_show_id(event: MessageCreated):
+    await event.message.answer(f"Ваш ID: {event.message.sender.user_id}")
+
+
 @dp.message_callback(F.callback.payload == "menu_request")
 async def on_menu_request(event: MessageCallback, context: MemoryContext):
     await event.message.answer(TEXT_REQUEST, attachments=[flow_markup()])
