@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#4f46e5">
+    <title>PostoBot — Панель</title>
+    <script src="https://st.max.ru/js/max-web-app.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary2: #7c3aed;
+            --bg: #eef1f8;
+            --card: #ffffff;
+            --text: #1c2130;
+            --muted: #8a90a6;
+            --border: #e5e8f0;
+            --green: #16a34a;
+            --green-bg: #e8f7ee;
+            --gray: #6b7280;
+            --gray-bg: #eef0f4;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        [hidden] { display: none !important; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #e6eaf4;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+        .app {
+            max-width: 430px;
+            margin: 0 auto;
+            height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            box-shadow: 0 0 40px rgba(80, 80, 120, .14);
+            position: relative;
+            overflow: hidden;
+        }
+        .app-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            color: #fff;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .app-header .logo-ico { font-size: 20px; }
+        .app-header .title { font-weight: 700; font-size: 17px; line-height: 1.2; }
+        .app-header .sub { font-size: 12px; opacity: .85; }
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 16px 24px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 2px 10px rgba(40, 40, 80, .05);
+            margin-bottom: 14px;
+        }
+        .hero { display: flex; align-items: center; gap: 14px; }
+        .avatar {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background-image: linear-gradient(135deg, var(--primary), var(--primary2));
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+            font-size: 26px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, .3);
+            overflow: hidden;
+        }
+        .hero-name { font-size: 18px; font-weight: 700; line-height: 1.25; }
+        .hero-username { color: var(--primary); font-size: 13px; font-weight: 600; }
+        .hero-sub { color: var(--muted); font-size: 12px; margin-top: 4px; }
+        .block-title {
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .count-badge {
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 24px;
+            height: 24px;
+            padding: 0 7px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .req-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+        }
+        .req-top { display: flex; align-items: center; gap: 8px; }
+        .req-ico { font-size: 16px; }
+        .req-id { font-weight: 700; font-size: 13px; }
+        .req-id .req-kind { color: var(--muted); font-weight: 600; }
+        .req-top .chip { margin-left: auto; }
+        .chip { font-size: 11px; padding: 3px 8px; border-radius: 20px; font-weight: 700; }
+        .chip.active { background: var(--green-bg); color: var(--green); }
+        .chip.archived { background: var(--gray-bg); color: var(--gray); }
+        .req-comment {
+            font-size: 13px;
+            color: #3c4459;
+            margin-top: 8px;
+            line-height: 1.45;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .req-meta { font-size: 11.5px; color: var(--muted); margin-top: 8px; }
+        .empty { text-align: center; padding: 26px 0; color: var(--muted); }
+        .empty-ico { font-size: 34px; margin-bottom: 8px; }
+        .empty p { font-size: 13px; }
+        .link-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            width: 100%;
+            padding-top: 6px;
+        }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px;
+            text-align: left;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--text);
+            transition: transform .1s, background .15s;
+        }
+        .action-btn:active { transform: scale(.97); background: #e4e8f3; }
+        .a-ico { font-size: 22px; }
+        .segmented {
+            display: flex;
+            background: #e2e6f1;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 14px;
+        }
+        .seg {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 9px 0;
+            border-radius: 9px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+        }
+        .seg.active {
+            background: #fff;
+            color: var(--primary);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, .08);
+        }
+        .news-item { padding-bottom: 12px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+        .news-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .news-date { font-size: 11px; color: var(--muted); }
+        .news-title { font-size: 14px; font-weight: 700; margin: 4px 0 6px; }
+        .news-text { font-size: 13px; color: #3c4459; line-height: 1.5; }
+        .about-logo { font-size: 42px; text-align: center; }
+        .about-name {
+            font-size: 20px;
+            font-weight: 800;
+            text-align: center;
+            margin-top: 6px;
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .about-text { font-size: 13.5px; color: #3c4459; line-height: 1.55; margin-top: 10px; }
+        .feature-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+        }
+        .feature-row:last-child { border-bottom: none; }
+        .about-foot { text-align: center; color: var(--muted); font-size: 11.5px; margin-top: 12px; }
+        .bottom-nav {
+            flex-shrink: 0;
+            display: flex;
+            background: #fff;
+            border-top: 1px solid var(--border);
+            padding: 6px 4px;
+            padding-bottom: calc(6px + env(safe-area-inset-bottom));
+        }
+        .nav-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            font-family: inherit;
+            font-size: 10.5px;
+            font-weight: 600;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 6px 0;
+            transition: color .15s;
+        }
+        .nav-btn .n-ico { font-size: 19px; }
+        .nav-btn.active { color: var(--primary); }
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(20, 22, 40, .5);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 50;
+        }
+        .modal {
+            width: 100%;
+            max-width: 430px;
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            padding: 20px 18px calc(18px + env(safe-area-inset-bottom));
+        }
+        .modal h3 { font-size: 16px; margin-bottom: 12px; }
+        .modal textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+            min-height: 96px;
+            outline: none;
+        }
+        .modal textarea:focus { border-color: var(--primary); }
+        .modal-actions { display: flex; gap: 10px; margin-top: 14px; }
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn.primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary2));
+            color: #fff;
+        }
+        .btn.ghost { background: var(--bg); color: var(--text); }
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(86px + env(safe-area-inset-bottom));
+            transform: translateX(-50%);
+            background: #1c2130;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 13px;
+            z-index: 60;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, .25);
+            max-width: 90%;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header class="app-header">
+            <span class="logo-ico">🤖</span>
+            <div>
+                <div class="title">PostoBot</div>
+                <div class="sub">Панель обращений · квартал 1409</div>
+            </div>
+        </header>
+
+        <main class="content" id="screen-home">
+            <section class="card hero">
+                <div class="avatar" id="avatar">П</div>
+                <div>
+                    <div class="hero-name" id="user-name">{{ user.first_name or 'Пользователь' }}</div>
+                    <div class="hero-username" id="user-username">{{ user.username or '' }}</div>
+                    <div class="hero-sub">Сообщество «Образовательный квартал 1409»</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2 class="block-title">Мои активные заявки <span class="count-badge" id="home-count">0</span></h2>
+                <div id="home-list" class="req-list"></div>
+                <div class="empty" id="home-empty">
+                    <div class="empty-ico">📭</div>
+                    <p>Активных заявок пока нет</p>
+                </div>
+                <button class="link-btn" id="home-all-btn" data-action="requests">Показать все заявки →</button>
+            </section>
+
+            <section class="card">
+                <h2 class="block-title">Быстрые действия</h2>
+                <div class="grid-2">
+                    <button class="action-btn" data-action="create" data-kind="заявка"><span class="a-ico">📝</span>Создать заявку</button>
+                    <button class="action-btn" data-action="create" data-kind="предложение"><span class="a-ico">💡</span>Предложение</button>
+                    <button class="action-btn" data-action="archive"><span class="a-ico">🗄</span>Архив</button>
+                    <button class="action-btn" data-action="about"><span class="a-ico">ℹ️</span>О боте</button>
+                </div>
+            </section>
+        </main>
+
+        <main class="content" id="screen-requests" hidden>
+            <div class="segmented">
+                <button class="seg active" data-sub="active">Активные</button>
+                <button class="seg" data-sub="archived">Архив</button>
+            </div>
+
+            <div class="req-list" id="req-active-list"></div>
+            <div class="empty" id="req-active-empty">
+                <div class="empty-ico">📭</div>
+                <p>Активных заявок нет</p>
+            </div>
+
+            <div class="req-list" id="req-archive-list" hidden></div>
+            <div class="empty" id="req-archive-empty" hidden>
+                <div class="empty-ico">🗄</div>
+                <p>В архиве пока пусто</p>
+            </div>
+        </main>
+
+        <main class="content" id="screen-news" hidden>
+            <section class="card">
+                <h2 class="block-title">📰 Новости PostoBot</h2>
+                <div class="news-item">
+                    <div class="news-date">21.09.2026</div>
+                    <div class="news-title">📢 Обновление панели</div>
+                    <div class="news-text">Появилась собственная панель обращений с быстрыми действиями, новостями и нижней навигацией по разделам.</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-date">20.09.2026</div>
+                    <div class="news-title">⚡️ Быстрые кнопки</div>
+                    <div class="news-text">Теперь заявку или предложение можно оставить прямо из панели, не открывая чат.</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-date">19.09.2026</div>
+                    <div class="news-title">📎 Напоминание</div>
+                    <div class="news-text">В чате с ботом к сообщению можно прикрепить фото — так мы реагируем быстрее.</div>
+                </div>
+            </section>
+        </main>
+
+        <main class="content" id="screen-about" hidden>
+            <section class="card">
+                <div class="about-logo">🤖</div>
+                <div class="about-name">PostoBot</div>
+                <p class="about-text">PostoBot — бот обращений образовательного квартала 1409. Помогает быстро оставить заявку или предложение и отслеживать их статус.</p>
+            </section>
+            <section class="card">
+                <h2 class="block-title">Возможности</h2>
+                <div class="feature-row">📝 Заявки и предложения</div>
+                <div class="feature-row">📋 Отслеживание статуса</div>
+                <div class="feature-row">🗄 Архив обращений</div>
+                <div class="feature-row">🎨 Удобная панель</div>
+            </section>
+            <section class="card">
+                <div class="about-foot">Версия 1.0.0 · работает на maxapi<br>Раздел «Образовательный квартал 1409»</div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-tab="home"><span class="n-ico">🏠</span>Главная</button>
+            <button class="nav-btn" data-tab="requests"><span class="n-ico">🗂️</span>Заявки</button>
+            <button class="nav-btn" data-tab="news"><span class="n-ico">📰</span>Новости</button>
+            <button class="nav-btn" data-tab="about"><span class="n-ico">ℹ️</span>О боте</button>
+        </nav>
+    </div>
+
+    <div class="modal-backdrop" id="modal" hidden>
+        <div class="modal">
+            <h3 id="modal-title">Создать заявку</h3>
+            <textarea id="modal-comment" rows="4" placeholder="Опишите проблему или предложение..."></textarea>
+            <div class="modal-actions">
+                <button class="btn ghost" id="modal-cancel">Отмена</button>
+                <button class="btn primary" id="modal-submit">Отправить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <script>
+        let SERVER_USER = {{ user | tojson }};
+        let SERVER_REQUESTS = {{ requests | tojson }};
+
+        const KIND_ICON = { 'заявка': '📝', 'предложение': '💡' };
+        const KIND_LABEL = { 'заявка': 'Заявка', 'предложение': 'Предложение' };
+
+        const $ = (sel) => document.querySelector(sel);
+        const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+        let active = [];
+        let archived = [];
+        let reqSub = 'active';
+        let modalKind = 'заявка';
+        let toastTimer;
+
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        function getInitData() {
+            try {
+                return (typeof WebApp !== 'undefined' && WebApp.initData) || '';
+            } catch (e) {
+                return '';
+            }
+        }
+
+        function initDataUser() {
+            try {
+                const raw = getInitData();
+                if (!raw) return null;
+                const params = new URLSearchParams(decodeURIComponent(raw));
+                const userRaw = params.get('user');
+                if (!userRaw) return null;
+                const t = JSON.parse(userRaw);
+                if (t && t.id != null) {
+                    return {
+                        id: Number(t.id),
+                        first_name: t.first_name || '',
+                        last_name: t.last_name || '',
+                        username: t.username || '',
+                        avatar_url: t.avatar_url || '',
+                        full_avatar_url: t.full_avatar_url || '',
+                        photo_url: t.photo_url || ''
+                    };
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        function currentUser() {
+            const uw = initDataUser();
+            if (uw) return uw;
+            if (SERVER_USER && SERVER_USER.id) return SERVER_USER;
+            return null;
+        }
+
+        function renderUser(u) {
+            const first = (u && u.first_name) || '';
+            const last = (u && u.last_name) || '';
+            const name = (first + ' ' + last).trim() || 'Пользователь';
+            const username = (u && u.username) ? '@' + u.username : '';
+
+            $('#user-name').textContent = name;
+
+            const unameEl = $('#user-username');
+            unameEl.textContent = username;
+            unameEl.style.display = username ? 'block' : 'none';
+
+            const avatar = $('#avatar');
+            const photo = (u && (u.full_avatar_url || u.avatar_url || u.photo_url)) || '';
+            if (photo) {
+                avatar.style.backgroundImage = 'url("' + photo.replace(/"/g, '%22') + '")';
+                avatar.textContent = '';
+            } else {
+                avatar.style.backgroundImage = '';
+                avatar.textContent = (first || 'П').charAt(0).toUpperCase();
+            }
+        }
+
+        function reqCard(r) {
+            const status = r.status === 'active' ? 'Активна' : 'В архиве';
+            const chipCls = r.status === 'active' ? 'active' : 'archived';
+            const photo = r.photo_url ? ' · 📎 фото' : '';
+            return '<div class="req-card">' +
+                '<div class="req-top"><span class="req-ico">' + (KIND_ICON[r.kind] || '📄') + '</span>' +
+                '<span class="req-id">#' + r.id + ' <span class="req-kind">' + (KIND_LABEL[r.kind] || r.kind) + '</span></span>' +
+                '<span class="chip ' + chipCls + '">' + status + '</span></div>' +
+                '<div class="req-comment">' + esc(r.comment) + '</div>' +
+                '<div class="req-meta">📅 ' + esc(r.created_at || '') + photo + '</div>' +
+                '</div>';
+        }
+
+        function renderAll() {
+            const u = currentUser();
+            renderUser(u);
+
+            const uid = u ? u.id : null;
+            const mine = uid ? SERVER_REQUESTS.filter((r) => Number(r.user_id) === Number(uid)) : [];
+            active = mine.filter((r) => r.status === 'active');
+            archived = mine.filter((r) => r.status === 'archived');
+
+            $('#home-count').textContent = String(active.length);
+            $('#home-list').innerHTML = active.slice(0, 3).map(reqCard).join('');
+            $('#home-empty').hidden = active.length > 0;
+            $('#home-all-btn').style.display = active.length > 0 ? '' : 'none';
+
+            $('#req-active-list').innerHTML = active.map(reqCard).join('');
+            $('#req-archive-list').innerHTML = archived.map(reqCard).join('');
+
+            updateReqSub();
+        }
+
+        function updateReqSub() {
+            const a = reqSub === 'active';
+            $('#req-active-list').hidden = !a;
+            $('#req-active-empty').hidden = !a || active.length > 0;
+            $('#req-archive-list').hidden = a;
+            $('#req-archive-empty').hidden = a || archived.length > 0;
+        }
+
+        function setReqSub(sub) {
+            reqSub = sub;
+            $$('.seg').forEach((b) => b.classList.toggle('active', b.dataset.sub === sub));
+            updateReqSub();
+        }
+
+        function goTab(tab) {
+            ['home', 'requests', 'news', 'about'].forEach((s) => {
+                $('#screen-' + s).hidden = s !== tab;
+            });
+            $$('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.tab === tab));
+            $('#screen-' + tab).scrollTop = 0;
+        }
+
+        function showToast(msg) {
+            const t = $('#toast');
+            t.textContent = msg;
+            t.hidden = false;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.hidden = true; }, 2600);
+        }
+
+        function openModal(kind) {
+            modalKind = kind;
+            $('#modal-title').textContent = kind === 'заявка' ? 'Создать заявку' : 'Сформировать предложение';
+            $('#modal-comment').value = '';
+            $('#modal').hidden = false;
+            $('#modal-comment').focus();
+        }
+
+        $$('.nav-btn').forEach((b) => b.addEventListener('click', () => goTab(b.dataset.tab)));
+        $$('.seg').forEach((b) => b.addEventListener('click', () => setReqSub(b.dataset.sub)));
+
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+            const a = btn.dataset.action;
+            if (a === 'create') {
+                openModal(btn.dataset.kind);
+            } else if (a === 'archive') {
+                goTab('requests');
+                setReqSub('archived');
+            } else if (a === 'about') {
+                goTab('about');
+            } else if (a === 'requests') {
+                goTab('requests');
+            }
+        });
+
+        $('#modal-cancel').addEventListener('click', () => { $('#modal').hidden = true; });
+        $('#modal').addEventListener('click', (e) => {
+            if (e.target === $('#modal')) $('#modal').hidden = true;
+        });
+
+        $('#modal-submit').addEventListener('click', async () => {
+            const comment = $('#modal-comment').value.trim();
+            if (!comment) {
+                showToast('Напишите комментарий');
+                return;
+            }
+            const u = currentUser() || {};
+            const btn = $('#modal-submit');
+            btn.disabled = true;
+            try {
+                const res = await fetch('/api/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        kind: modalKind,
+                        comment: comment,
+                        initData: getInitData(),
+                        user: {
+                            id: u.id,
+                            first_name: u.first_name || '',
+                            last_name: u.last_name || '',
+                            username: u.username || '',
+                            avatar_url: u.avatar_url || '',
+                            full_avatar_url: u.full_avatar_url || ''
+                        }
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Не удалось отправить');
+                SERVER_REQUESTS.push(data.request);
+                $('#modal').hidden = true;
+                showToast('#' + data.request.id + ': ' + (modalKind === 'заявка' ? 'Заявка принята!' : 'Предложение принято!'));
+                renderAll();
+            } catch (err) {
+                showToast('Ошибка: ' + err.message);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        async function bootstrap() {
+            const initData = getInitData();
+            if (!initData) return;
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ initData: initData })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.user && data.user.id) {
+                        SERVER_USER = data.user;
+                        SERVER_REQUESTS = data.requests || [];
+                    }
+                }
+            } catch (e) {}
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            if (typeof WebApp !== 'undefined') {
+                try { WebApp.ready(); } catch (e) {}
+            }
+            await bootstrap();
+            renderAll();
+        });
+    </script>
+</body>
+</html>
